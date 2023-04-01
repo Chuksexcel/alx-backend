@@ -1,54 +1,45 @@
 #!/usr/bin/env python3
-"""_defining languages_
-
-Returns:
-    _type_: flask application
-"""
-from flask_babel import Babel, _
-from flask import render_template, Flask, request
+"""Task 4 module"""
 
 
-class Config:
-    """_config file for flask_bable_
-    """
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-    BABEL_DEFAULT_LOCALE = 'en'
+from flask import Flask, render_template, request
+from flask_babel import Babel
+
+
+class Config(object):
+    """Configurations for babel"""
     LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 babel = Babel(app)
-'''
-app configs and calls
-'''
 
 
+# To make this work comment out line 23 and uncomment line 41
+# since new versions doesn't support it anymore
 @babel.localeselector
 def get_locale():
-    """_Language Localisation_
+    """Selects the language best match for the locale from the
+    configured languages"""
 
-    Returns:
-        Str: prefered user language
-    """
-    try:
-        language = [i for i in Config.LANGUAGES]
-    except ValueError:
-        language = None
-    if language is not None:
-        for j in language:
-            locale = request.args.get('locale')
-            if locale == j:
-                return locale
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        return locale
+
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
-@app.route('/')
-@app.route('/templates/4-index.html')
+@app.route("/", strict_slashes=False)
 def index() -> str:
-    """_Page Render_
+    """Serving the index page that has babel config"""
+    return render_template("4-index.html")
 
-    Returns:
-        str: Content of html
-    """
-    return render_template('4-index.html')
+
+# babel.init_app(app, locale_selector=get_locale)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)

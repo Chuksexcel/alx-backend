@@ -1,38 +1,40 @@
 #!/usr/bin/env python3
-'''
-creating a localization
-'''
+"""Task 2 module"""
 
+
+from flask import Flask, render_template, request
 from flask_babel import Babel
-from flask import render_template, Flask, request
+
+
+class Config(object):
+    """Configurations for babel"""
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
 app = Flask(__name__)
+app.config.from_object(Config)
 babel = Babel(app)
 
 
-class Config:
-    '''
-    creating languages
-    'en' 'fr'
-    '''
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-    BABEL_DEFAULT_LOCALE = 'en'
-    LANGUAGES = ["en", "fr"]
-
-
+# To make this work comment out line 23 and uncomment line 36
+# since new versions doesn't support it anymore
 @babel.localeselector
 def get_locale():
-    '''
-    determining the best language
-    '''
-    return request.accept_languages.best_match(app.config.from_object(Config))
+    """Selects the language best match for the locale from the
+    configured languages"""
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
-@app.route("/")
-@app.route("/templates/2-index.html")
-def index() -> str:
-    '''
-    view web page in accordance with locale
-    '''
-    return render_template('2-index.html')
+@app.route("/", strict_slashes=False)
+def index():
+    """Serving the index page that has babel config"""
+    return render_template("3-index.html")
+
+
+# babel.init_app(app, locale_selector=get_locale)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)

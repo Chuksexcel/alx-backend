@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task 5 module"""
+"""Task 7 module"""
 
 
 from flask import Flask, render_template, request, g
@@ -25,17 +25,30 @@ app.config.from_object(Config)
 babel = Babel(app)
 
 
-# To make this work comment out line 30 and uncomment line 65
+# To make this work comment out line 30 and uncomment line 78
 # since new versions doesn't support it anymore
 @babel.localeselector
 def get_locale():
     """Selects the language best match for the locale from the
     configured languages"""
 
+    # Locale from URL parameter
     locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
+    if locale and locale in app.config['LANGUAGES']:
         return locale
 
+    # locale from user settings
+    if g.user:
+        locale = g.user.get('locale')
+        if locale and locale in app.config['LANGUAGES']:
+            return locale
+
+    # Locale from request header
+    locale = request.headers.get('locale')
+    if locale and locale in app.config['LANGUAGES']:
+        return locale
+
+    # Default locale
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
@@ -59,7 +72,7 @@ def before_request():
 @app.route("/", strict_slashes=False)
 def index() -> str:
     """Serving the index page that has babel config"""
-    return render_template("5-index.html")
+    return render_template("6-index.html")
 
 
 # babel.init_app(app, locale_selector=get_locale)
